@@ -1,6 +1,6 @@
 # nix-overlays
 
-Collection of Nix overlays and package definitions.
+Collection of reusable Nix overlays and package definitions for external projects.
 
 ## Available Overlays
 
@@ -8,9 +8,11 @@ Collection of Nix overlays and package definitions.
 
 ## Usage
 
+### With Flakes
+
 You can use these overlays in your flake-based projects in several ways:
 
-### Using specific overlays
+#### Using specific overlays
 
 ```nix
 {
@@ -35,7 +37,7 @@ You can use these overlays in your flake-based projects in several ways:
 }
 ```
 
-### Using all overlays together
+#### Using all overlays together
 
 ```nix
 {
@@ -60,7 +62,7 @@ You can use these overlays in your flake-based projects in several ways:
 }
 ```
 
-### Directly using packages
+#### Directly using packages
 
 ```nix
 {
@@ -77,5 +79,24 @@ You can use these overlays in your flake-based projects in several ways:
     # Example for accessing a package directly
     packages.${system}.default = nix-overlays.packages.${system}.uv;
   };
+}
+```
+
+### Without Flakes
+
+For traditional Nix usage without flakes:
+
+```nix
+# In your configuration.nix or shell.nix
+let
+  nix-overlays = builtins.fetchTarball {
+    url = "https://github.com/softinio/nix-overlays/archive/main.tar.gz";
+  };
+  overlays = import "${nix-overlays}/default.nix" { };
+in
+{
+  nixpkgs.overlays = [
+    overlays.default  # or overlays.uv for specific overlay
+  ];
 }
 ```

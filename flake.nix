@@ -1,5 +1,5 @@
 {
-  description = "Nix Flake used for testing overlays";
+  description = "Collection of reusable Nix overlays";
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
@@ -7,17 +7,18 @@
   };
 
   outputs = { self, nixpkgs, flake-utils }:
+    let
+      # Import overlays from default.nix
+      overlaySet = import ./default.nix { };
+    in
     {
-      # Expose each overlay individually
+      # Expose overlays for external use
       overlays = {
-        default = nixpkgs.lib.composeManyExtensions [ self.overlays.uv ];
-        uv = final: prev: {
-          python313 = prev.python313.override {
-            packageOverrides = pyFinal: pyPrev: {
-              uv = pyFinal.callPackage ./pkgs/uv/default.nix { };
-            };
-          };
-        };
+        # Main overlay that includes all packages
+        default = overlaySet.default;
+        
+        # Individual overlays
+        uv = overlaySet.uv;
       };
     } // 
     flake-utils.lib.eachDefaultSystem (system:
